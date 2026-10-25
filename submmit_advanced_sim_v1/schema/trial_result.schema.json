@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "trial_result.schema.json",
+  "title": "AIWorker whiteboard erasing trial result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "trial_id", "status", "started_at_utc", "ended_at_utc", "duration_seconds", "metrics", "evidence", "operator_notes"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"},
+    "trial_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"},
+    "status": {"enum": ["completed", "failed", "aborted", "invalid"]},
+    "started_at_utc": {"type": "string", "format": "date-time"},
+    "ended_at_utc": {"type": "string", "format": "date-time"},
+    "duration_seconds": {"type": "number", "minimum": 0},
+    "metrics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["available", "before_target_ink_pixels", "residual_target_ink_pixels", "target_roi_erasure_ratio", "outside_ink_mask_change_ratio"],
+      "properties": {
+        "available": {"type": "boolean"},
+        "before_target_ink_pixels": {"type": ["integer", "null"], "minimum": 0},
+        "residual_target_ink_pixels": {"type": ["integer", "null"], "minimum": 0},
+        "target_roi_erasure_ratio": {"type": ["number", "null"], "maximum": 1},
+        "outside_ink_mask_change_ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "evidence": {"type": "object", "additionalProperties": false, "required": ["before_mask_sha256", "after_mask_sha256", "board_mask_sha256", "target_roi_mask_sha256", "video_id_or_redacted_path"], "properties": {"before_mask_sha256": {"type": ["string", "null"]}, "after_mask_sha256": {"type": ["string", "null"]}, "board_mask_sha256": {"type": ["string", "null"]}, "target_roi_mask_sha256": {"type": ["string", "null"]}, "video_id_or_redacted_path": {"type": ["string", "null"]}}},
+    "operator_notes": {"type": "string"}
+  }
+}

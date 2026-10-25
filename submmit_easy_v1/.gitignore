@@ -1,0 +1,8 @@
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+runs/
+q_table.json
+REPORT_MEASUREMENTS.md
+__pycache__/
+*.py[cod]

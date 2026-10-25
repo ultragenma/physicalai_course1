@@ -1,0 +1,6 @@
+# Install inside a Python 3.12 virtual environment that can see sourced ROS 2 Jazzy.
+numpy==1.26.4
+PyYAML==6.0.2
+pyzmq==27.0.1
+msgpack==1.1.0
+msgpack-numpy==0.4.8

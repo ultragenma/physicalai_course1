@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "experiment_metadata.schema.json",
+  "title": "AIWorker whiteboard erasing experiment metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "recorded_at_utc", "execution", "software", "robot", "task", "privacy_review"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"},
+    "recorded_at_utc": {"type": "string", "format": "date-time"},
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "simulator", "asset_source", "asset_revision", "asset_variant", "scene_revision"],
+      "properties": {
+        "kind": {"enum": ["simulation", "real_robot"]},
+        "simulator": {"enum": ["gazebo", "mujoco", "isaac_lab", "other"]},
+        "asset_source": {"type": "string"},
+        "asset_revision": {"type": "string"},
+        "asset_variant": {"type": "string"},
+        "scene_revision": {"type": "string"}
+      }
+    },
+    "software": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ros_distro", "robot_software_version", "policy_runtime", "policy_runtime_revision", "policy_model", "checkpoint_id", "gpu"],
+      "properties": {
+        "ros_distro": {"type": "string"},
+        "robot_software_version": {"type": "string"},
+        "policy_runtime": {"type": "string"},
+        "policy_runtime_revision": {"type": "string"},
+        "policy_model": {"type": "string"},
+        "checkpoint_id": {"type": "string"},
+        "gpu": {"type": "object", "additionalProperties": false, "required": ["name", "driver_version", "vram_gb"], "properties": {"name": {"type": "string"}, "driver_version": {"type": "string"}, "vram_gb": {"type": ["number", "null"], "minimum": 0}}}
+      }
+    },
+    "robot": {"type": "object", "additionalProperties": false, "required": ["model", "asset_license", "interface_contract_revision"], "properties": {"model": {"type": "string"}, "asset_license": {"type": "string"}, "interface_contract_revision": {"type": "string"}}},
+    "task": {"type": "object", "additionalProperties": false, "required": ["instruction", "board_setup_id", "mask_generation_method", "calibration_revision"], "properties": {"instruction": {"type": "string"}, "board_setup_id": {"type": "string"}, "mask_generation_method": {"type": "string"}, "calibration_revision": {"type": "string"}}},
+    "privacy_review": {"type": "object", "additionalProperties": false, "required": ["contains_personal_information", "contains_internal_network_information", "contains_confidential_information", "public_safe_summary"], "properties": {"contains_personal_information": {"type": ["boolean", "null"]}, "contains_internal_network_information": {"type": ["boolean", "null"]}, "contains_confidential_information": {"type": ["boolean", "null"]}, "public_safe_summary": {"type": "string"}}}
+  }
+}

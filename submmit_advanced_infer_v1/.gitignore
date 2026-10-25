@@ -1,0 +1,10 @@
+aiworker.local.yaml
+artifacts/
+*.bag
+*.db3
+*.mcap
+*.rosbag
+checkpoints/
+.venv*/
+__pycache__/
+*.py[cod]

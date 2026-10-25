@@ -1,0 +1,1 @@
+"""Whiteboard erasing task components."""

@@ -1,0 +1,27 @@
+# AIWorkerの公式ROS 2パッケージおよび会社PCの ros2 topic list / ros2 action list で確認後に埋める。
+# 空文字の値を使って実機やシミュレータを起動してはならない。
+robot:
+  ros_domain_id: null
+  base_frame: ""              # 例: 実測したbase link。推測で記入しない
+  tool_frame: ""              # 消し具の先端フレーム
+  planning_group: ""          # MoveItの片腕または両腕グループ
+  camera_frame: ""            # 白板観測カメラの光学フレーム
+  move_group_action: ""       # 確認済みMoveIt action名
+simulation:
+  backend: ""                  # gazebo | mujoco | isaac_lab; choose after asset/model verification
+  asset_source: ""            # 公式URDF/SDF/MJCF、または cyclo_lab のURL・commit
+  asset_variant: ""           # cyclo_lab利用時の確認済みAIWorker USD variant。推測で記入しない
+topics:
+  rgb_image: ""               # sensor_msgs/msg/Image
+  camera_info: ""             # sensor_msgs/msg/CameraInfo
+  joint_states: ""            # sensor_msgs/msg/JointState
+  emergency_stop: ""          # 公式インターフェースを確認して設定
+whiteboard:
+  # base_frameで表した四隅 [m]。実測/シミュレータで校正して設定する。
+  corners_base_m: []
+  safe_contact_normal_force_n: null
+  max_cartesian_speed_mps: null # メーカー許容値・simulation試験で確定するまで必ず空欄
+  row_spacing_m: 0.025 # not yet derived from measured eraser-pad width; coverage is not guaranteed
+acceptance:
+  target_erasure_ratio: 0.90
+  max_outside_ink_mask_change_ratio: 0.01

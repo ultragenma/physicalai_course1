@@ -1,0 +1,60 @@
+# Copy to aiworker.local.yaml.  Keep that file out of Git.
+# Every TODO must be filled from `ros2 topic/action list -t` and vendor docs.
+robot:
+  name: "ROBOTIS AIWorker" # descriptive only
+
+interfaces:
+  joint_state_topic: "" # TODO: sensor_msgs/msg/JointState topic
+  camera_topic: "" # TODO: sensor_msgs/msg/Image topic, verified with `ros2 topic list -t`
+  camera_frame_id: "" # TODO: exact header.frame_id observed on camera_topic
+  command_topic: "" # TODO: vendor-verified JointTrajectory topic; leave blank if the API is an action/service
+  policy_action_topic: "/groot_candidate_trajectory" # candidate only, never the vendor command endpoint
+  base_frame: "" # TODO
+  eraser_frame: "" # TODO: TF frame fixed to eraser contact surface
+
+# This sample intentionally supports one ordered joint-position vector.
+# Copy the exact order from the fine-tuning dataset and compare with live JointState.name.
+controlled_joint_names: []
+joint_velocity_limits_rad_s: {} # TODO: exact positive limits from vendor docs/controller
+joint_limits_rad: {} # TODO: {joint_name: {min: -1.0, max: 1.0}}
+
+safety:
+  require_operator_arm: true
+  arm_parameter: false # must be overridden as `-p arm_parameter:=true`
+  max_step_rad: 0.05 # bridge/gateway local candidate check; does not replace vendor trajectory limits
+  min_trajectory_seconds: 0.1
+  max_trajectory_seconds: 0.5
+  joint_state_timeout_seconds: 0.25
+  policy_action_timeout_seconds: 0.25
+
+policy:
+  task_instruction: "Erase the marked writing on the whiteboard with the eraser."
+  server_host: "127.0.0.1" # loopback only; use an SSH local-forward to the GPU PC
+  server_port: 5555
+  client_timeout_ms: 15000
+  chunk_index: 0 # selects a point from the predicted action chunk; default is the first point
+  action_key: "" # TODO: exact action key returned by the fine-tuned GR00T policy
+  action_mode: "absolute_joint_position" # GR00T PolicyServer returns decoded joint targets for supported ActionConfig reps
+
+observation:
+  video_key: "" # TODO: exact camera key in the fine-tuning modality config
+  state_key: "" # TODO: exact state key in the fine-tuning modality config
+  language_key: "" # TODO: exact language key in the fine-tuning modality config
+  state_joint_names: [] # must exactly match controlled_joint_names in this sample
+  history_frames: 1 # checkpoint modality config must use delta_indices=[0]
+
+action:
+  joint_names: [] # must exactly match controlled_joint_names and the trained action order
+  duration_s: 0.2 # example only: set to one trained action timestep and approved controller duration
+
+timing:
+  max_camera_age_s: 0.5
+  max_joint_state_age_s: 0.25
+  max_stamp_skew_s: 0.05 # camera and JointState header stamps must share a clock
+  max_observation_age_for_action_s: 1.0 # drop results whose source observation is too old
+  infer_period_s: 0.1
+
+calibration:
+  camera_intrinsics: "TODO: stored locally, not public"
+  board_frame: "TODO: board pose in robot base frame"
+  tool_contact_offset: "TODO: eraser pad center relative to eraser_frame"

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>qlearn_turtle_nav</name>
+  <version>0.1.0</version>
+  <description>Q-learning goal navigation node for ROS 2 turtlesim.</description>
+  <maintainer email="40537061+ultragenma@users.noreply.github.com">ultragenma</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>rclpy</depend>
+  <depend>turtlesim</depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

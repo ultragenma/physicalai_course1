@@ -1,0 +1,10 @@
+config/aiworker_interface.yaml
+.venv*/
+artifacts/
+assets/**
+!assets/
+!assets/README.md
+*.bag
+*.mcap
+__pycache__/
+*.pyc

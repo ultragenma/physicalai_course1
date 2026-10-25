@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "run_id": "sim_YYYYMMDD_001",
+  "recorded_at_utc": "YYYY-MM-DDTHH:MM:SSZ",
+  "execution": {
+    "kind": "simulation",
+    "simulator": "other",
+    "asset_source": "TODO: selected official simulator/asset source after model verification",
+    "asset_revision": "TODO: exact commit",
+    "asset_variant": "TODO: verified AIWorker variant",
+    "scene_revision": "TODO: whiteboard scene commit or asset hash"
+  },
+  "software": {
+    "ros_distro": "TODO",
+    "robot_software_version": "TODO",
+    "policy_runtime": "TODO: e.g. Cyclo Intelligence or Isaac-GR00T",
+    "policy_runtime_revision": "TODO: exact version/commit/container tag",
+    "policy_model": "TODO: exact selected policy/model ID",
+    "checkpoint_id": "TODO: public-safe model/checkpoint hash or identifier",
+    "gpu": {"name": "TODO", "driver_version": "TODO", "vram_gb": null}
+  },
+  "robot": {"model": "TODO: verified AIWorker model", "asset_license": "TODO", "interface_contract_revision": "TODO: local non-secret revision"},
+  "task": {"instruction": "Erase the marked writing on the whiteboard with the eraser.", "board_setup_id": "TODO: anonymized board setup", "mask_generation_method": "TODO: model/algorithm and threshold", "calibration_revision": "TODO: redacted calibration revision"},
+  "privacy_review": {"contains_personal_information": null, "contains_internal_network_information": null, "contains_confidential_information": null, "public_safe_summary": "TODO: summarize the human review; all three booleans must be false before public facts are generated."}
+}
