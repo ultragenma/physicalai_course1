@@ -12,5 +12,8 @@
 `d8c1abd8a27d8e859455bbe514df2bcc617db0fb` を参照しています。
 参照: https://huggingface.co/allenai/MolmoAct2-DROID/tree/d8c1abd8a27d8e859455bbe514df2bcc617db0fb
 
+`wb_eraser/vlm_server.py` の画像QA生成は、同revisionの `modeling_molmoact2.py` の `forward()` にある
+chat-template / generate / decode例を参照しています。ロボット関節のaction出力とは別の呼出し経路です。
+
 これらの参照実装のライセンスは Apache-2.0 です。本文を `Apache-2.0.txt` に収録しています。
 モデル重みのライセンスはコードのライセンスと別途確認してください。

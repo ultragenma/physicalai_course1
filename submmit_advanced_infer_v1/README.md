@@ -2,7 +2,8 @@
 
 2026-10-28: [MolmoAct2用の独立パッケージ](molmoact2/README.md)を追加しました。
 GPUサーバ、同期ROS/HTTPクライアント、公開DROID方策の診断とAIWorker native形式の検査を含みます。
-MolmoAct2版は推論値の保存までで、以下のGR00T gatewayへは接続しません。
+MolmoAct2の関節action経路は保存まで。新しい[対象選択＋幾何計画＋MoveL](molmoact2/docs/HYBRID_ERASER.md)は動作指令まで実行します。
+この経路は以下のGR00T gatewayへ接続せず、MolmoAct2の関節actionも使いません。
 
 This directory is a **deployment preparation deliverable**, not evidence that an
 AIWorker has already been controlled by GR00T.  The target task is: use an

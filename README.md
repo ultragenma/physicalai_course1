@@ -9,7 +9,7 @@ Physical AI 応用1の最終課題に向けたコード、実行手順、実験�
 | [submmit_easy_v1](submmit_easy_v1/README.md) | ROS 2 turtlesimのQ-learning目標到達、学習・独立評価の記録、レポート表生成 | ROS 2 build・学習・評価は未実施 |
 | [submmit_advanced_sim_v1](submmit_advanced_sim_v1/README.md) | AIWorker白板消去の二値マスク評価、幾何経路、観測metadata、実験記録 | AI方策・scene・動作実行は未実装。シミュレーション未実施 |
 | [submmit_advanced_infer_v1](submmit_advanced_infer_v1/README.md) | AIWorkerのZenoh/ROS 2観測を別GPU PCのGR00T N1.7へ送る推論サンプル、候補trajectory、既定disarmのgateway | 3系統の静的レビュー済み。ROS/GPU/実機では未実行 |
-| [MolmoAct2推論](submmit_advanced_infer_v1/molmoact2/README.md) | 別GPUのMolmoAct2サーバ、AIWorkerの同期ROS/HTTPクライアント、公開DROID診断と19次元native契約 | CPUテスト14件と隔離ROS/HTTP経路を検証。実モデルのGPU forward・実機では未検証 |
+| [MolmoAct2とMoveL実行](submmit_advanced_infer_v1/molmoact2/README.md) | 追加学習なしの文字領域選択→3D経路→MoveL実行。関節actionの診断用経路も収録 | CPUテスト20件、隔離ROSで8件のMoveL送受信・位置応答・最終観測を検証。実GPU・実機は未検証 |
 
 ディレクトリ名の`submmit`は既存の提出物名を維持しています。
 
@@ -19,6 +19,7 @@ Physical AI 応用1の最終課題に向けたコード、実行手順、実験�
 2. 上級sim案は [実装計画](submmit_advanced_sim_v1/docs/IMPLEMENTATION_PLAN.md) と [実験記録手順](submmit_advanced_sim_v1/docs/EXPERIMENT_RECORDING.md) を使用します。
 3. 上級推論案は [GPU分離推論RUNBOOK](submmit_advanced_infer_v1/docs/RUNBOOK.md) を使用します。AIWorkerの実topic・型・関節順・制限値・vendor環境と、AIWorker用に学習したcheckpointが必要です。
 4. MolmoAct2版は[専用手順](submmit_advanced_infer_v1/molmoact2/docs/MOLMOACT2.md)を使用します。公開DROID重みはFranka用であり、AIWorkerの動作方策ではありません。診断時は予測値を保存し、アクチュエータへ配信しません。
+5. 実際の動作指令まで進める新構成は[対象選択＋幾何計画＋MoveL](submmit_advanced_infer_v1/molmoact2/docs/HYBRID_ERASER.md)。MolmoAct2の画像・言語部分を使い、`hybrid_run --execute`で実行します。文字消去の成功・失敗をプログラムの実行完了と区別します。
 
 上級推論の構成:
 

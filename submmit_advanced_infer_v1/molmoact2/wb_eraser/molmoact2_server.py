@@ -35,8 +35,10 @@ def inspect_weights(checkpoint):
             "weight_files": names, "weight_bytes_present": size, "tensor_bytes_expected": total}
 
 
-class MolmoAct2Backend:
-    def __init__(self, checkpoint, schema, device="cuda:0", dtype="bfloat16", num_steps=10):
+class MolmoModel:
+    """Shared model/processor loader for joint actions and visual target selection."""
+
+    def __init__(self, checkpoint, device="cuda:0", dtype="bfloat16"):
         if not inspect_weights(checkpoint)["complete"]:
             raise ValueError("checkpoint download is incomplete; inspect/download before loading the GPU model")
         if not device.startswith("cuda"):
@@ -48,10 +50,11 @@ class MolmoAct2Backend:
             raise RuntimeError("CUDA is unavailable; run this server on the separate GPU PC")
         if dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
             raise RuntimeError("this GPU does not support bfloat16; select --dtype float16 or float32")
+        capability = torch.cuda.get_device_capability(torch.device(device))
+        if capability == (12, 0) and "sm_120" not in torch.cuda.get_arch_list():
+            raise RuntimeError("RTX 5090 requires an sm_120-capable PyTorch wheel; install the CUDA 12.8 build")
         from transformers import AutoModelForImageTextToText, AutoProcessor
         self.torch = torch
-        self.schema = schema
-        self.num_steps = num_steps
         self.processor = AutoProcessor.from_pretrained(str(checkpoint), trust_remote_code=True,
                                                        local_files_only=True, extra_special_tokens={})
         self.model = AutoModelForImageTextToText.from_pretrained(
@@ -73,6 +76,12 @@ class MolmoAct2Backend:
         # Official server uses this instance-level cast for processor float inputs.
         # The pinned checkpoint already fixes trajectory dtype and bf16 -> NumPy.
         self.model._move_inputs_to_device = move_and_cast
+
+
+class MolmoAct2Backend(MolmoModel):
+    def __init__(self, checkpoint, schema, device="cuda:0", dtype="bfloat16", num_steps=10):
+        super().__init__(checkpoint, device, dtype)
+        self.schema, self.num_steps = schema, num_steps
 
     def predict(self, images, state, task):
         with self.torch.inference_mode():
