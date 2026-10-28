@@ -1,0 +1,3 @@
+# CPU-only client/protocol. Use NumPy 1.x when installing in the vendor ROS venv.
+numpy>=1.26,<3
+pillow>=10,<13

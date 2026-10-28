@@ -1,0 +1,7 @@
+FROM robotis/ai-worker:2.2.1
+USER root
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ros-jazzy-rclpy ros-jazzy-cv-bridge ros-jazzy-message-filters \
+    ros-jazzy-rmw-fastrtps-cpp python3-numpy python3-pil && apt-get clean
+WORKDIR /task
+ENTRYPOINT ["/bin/bash"]

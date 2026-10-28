@@ -1,0 +1,9 @@
+{
+  "name": "droid_right_arm_probe",
+  "kind": "droid_probe",
+  "norm_tag": "franka_droid",
+  "camera_order": ["cam_left_head", "cam_left_head", "cam_right_wrist"],
+  "joint_order": ["arm_r_joint1", "arm_r_joint2", "arm_r_joint3", "arm_r_joint4", "arm_r_joint5", "arm_r_joint6", "arm_r_joint7", "gripper_r_joint1"],
+  "action_names": ["franka_joint1", "franka_joint2", "franka_joint3", "franka_joint4", "franka_joint5", "franka_joint6", "franka_joint7", "franka_gripper"],
+  "note": "Diagnostic conditioning only: raw AIWorker right-arm values are not calibrated Franka state. Predictions remain Franka actions and must not be sent to AIWorker."
+}

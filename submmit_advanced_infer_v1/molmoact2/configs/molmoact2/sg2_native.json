@@ -1,0 +1,9 @@
+{
+  "name": "sg2_stationary_native",
+  "kind": "sg2_native",
+  "norm_tag": "aiworker_sg2_stationary",
+  "camera_order": ["cam_left_head", "cam_left_wrist", "cam_right_wrist"],
+  "joint_order": ["arm_l_joint1", "arm_l_joint2", "arm_l_joint3", "arm_l_joint4", "arm_l_joint5", "arm_l_joint6", "arm_l_joint7", "gripper_l_joint1", "arm_r_joint1", "arm_r_joint2", "arm_r_joint3", "arm_r_joint4", "arm_r_joint5", "arm_r_joint6", "arm_r_joint7", "gripper_r_joint1", "head_joint1", "head_joint2", "lift_joint"],
+  "action_names": ["arm_l_joint1", "arm_l_joint2", "arm_l_joint3", "arm_l_joint4", "arm_l_joint5", "arm_l_joint6", "arm_l_joint7", "gripper_l_joint1", "arm_r_joint1", "arm_r_joint2", "arm_r_joint3", "arm_r_joint4", "arm_r_joint5", "arm_r_joint6", "arm_r_joint7", "gripper_r_joint1", "head_joint1", "head_joint2", "lift_joint"],
+  "note": "Requires an AIWorker-finetuned MolmoAct2 checkpoint with this normalization tag and explicit robot/joint/camera metadata. The public DROID checkpoint is intentionally rejected."
+}

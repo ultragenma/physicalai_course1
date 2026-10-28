@@ -1,0 +1,11 @@
+# Python 3.11/3.12 on the separate GPU PC. Install CUDA PyTorch as in docs/MOLMOACT2.md.
+-r requirements-molmoact2-client.txt
+torch==2.11.0
+torchvision==0.26.0
+transformers>=4.57,<4.58
+accelerate>=1,<2
+safetensors>=0.4,<1
+huggingface-hub>=0.36,<1
+einops>=0.7,<1
+sentencepiece>=0.2,<1
+protobuf>=4.25

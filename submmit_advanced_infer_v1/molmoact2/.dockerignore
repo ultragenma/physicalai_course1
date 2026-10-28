@@ -1,0 +1,7 @@
+.git
+.venv*
+checkpoints
+runs
+__pycache__
+*.npz
+*.mp4

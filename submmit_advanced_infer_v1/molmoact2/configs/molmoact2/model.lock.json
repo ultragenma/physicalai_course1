@@ -1,0 +1,15 @@
+{
+  "model_id": "allenai/MolmoAct2-DROID",
+  "revision": "d8c1abd8a27d8e859455bbe514df2bcc617db0fb",
+  "upstream_repository": "https://github.com/allenai/molmoact2",
+  "upstream_commit": "6070080a20321b4f498ab30f28e1d09ac465edb7",
+  "profile": "configs/molmoact2/droid_probe.json",
+  "norm_tag": "franka_droid",
+  "state_dim": 8,
+  "action_dim": 8,
+  "action_horizon": 15,
+  "weight_bytes": 21768955912,
+  "aiworker_native_policy": false,
+  "norm_stats_sha256": "9cc29b5018604be4b785dd6519be3c86d0420675da7364755c58155afccb131d",
+  "config_sha256": "80faf9afa5b87b01dd4dceac6c53e5194680b5f965287de213fbce73e0775100"
+}

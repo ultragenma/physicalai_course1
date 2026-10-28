@@ -1,5 +1,9 @@
 # AIWorker Whiteboard Erasing — GR00T N1.7 inference preparation
 
+2026-10-28: [MolmoAct2用の独立パッケージ](molmoact2/README.md)を追加しました。
+GPUサーバ、同期ROS/HTTPクライアント、公開DROID方策の診断とAIWorker native形式の検査を含みます。
+MolmoAct2版は推論値の保存までで、以下のGR00T gatewayへは接続しません。
+
 This directory is a **deployment preparation deliverable**, not evidence that an
 AIWorker has already been controlled by GR00T.  The target task is: use an
 eraser held by the robot to erase specified writing on a vertical whiteboard,
