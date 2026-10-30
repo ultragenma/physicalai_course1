@@ -33,6 +33,10 @@ def main() -> None:
     parser.add_argument("--trials-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary-csv", type=Path, help="Optional sanitized per-trial summary CSV")
+    parser.add_argument(
+        "--include-reviewed-environment", action="store_true",
+        help="Export technical metadata only after every exported environment field has been anonymized and approved",
+    )
     args = parser.parse_args()
 
     metadata = validate_metadata(load(args.metadata), require_public_review=True)
@@ -48,10 +52,14 @@ def main() -> None:
 
     statuses: dict[str, int] = {}
     measured = []
+    invalid_measured_count = 0
     for trial in trials:
         statuses[trial["status"]] = statuses.get(trial["status"], 0) + 1
         if trial["metrics"]["available"]:
-            measured.append(trial["metrics"])
+            if trial["status"] == "invalid":
+                invalid_measured_count += 1
+            else:
+                measured.append(trial["metrics"])
     erasures = [entry["target_roi_erasure_ratio"] for entry in measured]
     outside = [entry["outside_ink_mask_change_ratio"] for entry in measured]
     execution = metadata["execution"]
@@ -63,16 +71,26 @@ def main() -> None:
         "# レポートへ転記する公開確認済みファクト（自動生成）", "",
         "> 生成には個人情報・社内ネットワーク情報・機密情報の3項目すべてを人が確認し、metadata.jsonでfalseにする必要がある。operator_notes、動画参照、マスク参照、画像内容は出力しない。", "",
         "## 実験環境", "",
+        f"- 人手確認済みの公開用要約: {public_text(metadata['privacy_review']['public_safe_summary'])}",
         f"- run_id: `{run_id}`", f"- 実行種別: {public_text(execution['kind'])}",
-        f"- シミュレータ: {public_text(execution['simulator'])}",
-        f"- asset: {public_text(execution['asset_source'])} @ {public_text(execution['asset_revision'])} / {public_text(execution['asset_variant'])}",
-        f"- scene revision: {public_text(scene_revision)}", f"- AIWorker型式: {public_text(robot['model'])}",
-        f"- ROS: {public_text(software['ros_distro'])}; robot software: {public_text(software['robot_software_version'])}",
-        f"- policy: {public_text(software['policy_runtime'])} @ {public_text(software['policy_runtime_revision'])}; model: {public_text(software['policy_model'])}; checkpoint: {public_text(software['checkpoint_id'])}",
-        f"- GPU: {public_text(gpu['name'])} / driver {public_text(gpu['driver_version'])} / {gpu['vram_gb'] if gpu['vram_gb'] is not None else '未記録'} GB",
+    ]
+    if args.include_reviewed_environment:
+        lines += [
+            f"- シミュレータ: {public_text(execution['simulator'])}",
+            f"- asset: {public_text(execution['asset_source'])} @ {public_text(execution['asset_revision'])} / {public_text(execution['asset_variant'])}",
+            f"- scene revision: {public_text(scene_revision)}", f"- AIWorker型式: {public_text(robot['model'])}",
+            f"- ROS: {public_text(software['ros_distro'])}; robot software: {public_text(software['robot_software_version'])}",
+            f"- policy: {public_text(software['policy_runtime'])} @ {public_text(software['policy_runtime_revision'])}; model: {public_text(software['policy_model'])}; checkpoint: {public_text(software['checkpoint_id'])}",
+            f"- GPU: {public_text(gpu['name'])} / driver {public_text(gpu['driver_version'])} / {gpu.get('vram_gb') if gpu.get('vram_gb') is not None else '未記録'} GB",
+        ]
+    else:
+        lines.append("- 詳細な環境識別子は既定では出力しない。公開承認後に --include-reviewed-environment を指定できる。")
+    lines += [
         "", "## 試行集計", "",
         f"- 全試行数: {len(trials)}", f"- 状態別: {', '.join(f'{key}={value}' for key, value in sorted(statuses.items())) or '記録なし'}",
-        f"- マスク計測済み試行数: {len(measured)}", f"- 平均対象ROI消去率: {fmt(mean(erasures) if erasures else None)} (小数比; 0.90 = 90%)",
+        f"- 平均指標の対象試行数: {len(measured)} (metricsあり、invalidを除外。failed/abortedの計測値は含む)",
+        f"- invalidのため平均から除外した計測済み試行数: {invalid_measured_count}",
+        f"- 平均対象ROI消去率: {fmt(mean(erasures) if erasures else None)} (小数比; 0.90 = 90%)",
         f"- 平均白板外筆跡マスク変化率: {fmt(mean(outside) if outside else None, 6)} (小数比)", "", "## 試行別記録", "",
         "| trial_id | status | duration_s | target ROI erasure | outside ink-mask change |", "| --- | --- | ---: | ---: | ---: |",
     ]
@@ -96,11 +114,12 @@ def main() -> None:
         summary_csv = ensure_artifacts_output(args.summary_csv, run_id)
         summary_csv.parent.mkdir(parents=True, exist_ok=True)
         with summary_csv.open("w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=("run_id", "trial_id", "status", "duration_seconds", "target_roi_erasure_ratio", "outside_ink_mask_change_ratio"))
+            writer = csv.DictWriter(f, fieldnames=("run_id", "trial_id", "status", "included_in_metric_averages", "duration_seconds", "target_roi_erasure_ratio", "outside_ink_mask_change_ratio"))
             writer.writeheader()
             for trial in trials:
                 metrics = trial["metrics"]
                 writer.writerow({"run_id": run_id, "trial_id": trial["trial_id"], "status": trial["status"],
+                                 "included_in_metric_averages": metrics["available"] and trial["status"] != "invalid",
                                  "duration_seconds": trial["duration_seconds"],
                                  "target_roi_erasure_ratio": metrics["target_roi_erasure_ratio"],
                                  "outside_ink_mask_change_ratio": metrics["outside_ink_mask_change_ratio"]})

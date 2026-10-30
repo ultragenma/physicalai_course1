@@ -2,6 +2,8 @@
 
 Physical AI 応用1の最終課題に向けたコード、実行手順、実験記録、レポート草稿です。
 
+上級案の主経路は、更新された **MolmoAct2の対象選択＋RGB-D幾何計画＋MoveL実行**です。[主経路の手順](submmit_advanced_infer_v1/molmoact2/docs/HYBRID_ERASER.md)から進めます。従来のGR00T N1.7案、簡易案、sim評価コードも同じリポジトリに保持しています。統合内容と検証範囲は[統合レビュー記録](REVIEW_FOLLOWUP.md)を参照してください。
+
 ## 収録内容
 
 | ディレクトリ | 内容 | 検証状況 |
@@ -17,11 +19,20 @@ Physical AI 応用1の最終課題に向けたコード、実行手順、実験�
 
 1. 簡易案は [学習・評価RUNBOOK](submmit_easy_v1/RUNBOOK.md) を使用します。
 2. 上級sim案は [実装計画](submmit_advanced_sim_v1/docs/IMPLEMENTATION_PLAN.md) と [実験記録手順](submmit_advanced_sim_v1/docs/EXPERIMENT_RECORDING.md) を使用します。
-3. 上級推論案は [GPU分離推論RUNBOOK](submmit_advanced_infer_v1/docs/RUNBOOK.md) を使用します。AIWorkerの実topic・型・関節順・制限値・vendor環境と、AIWorker用に学習したcheckpointが必要です。
-4. MolmoAct2版は[専用手順](submmit_advanced_infer_v1/molmoact2/docs/MOLMOACT2.md)を使用します。公開DROID重みはFranka用であり、AIWorkerの動作方策ではありません。診断時は予測値を保存し、アクチュエータへ配信しません。
-5. 実際の動作指令まで進める新構成は[対象選択＋幾何計画＋MoveL](submmit_advanced_infer_v1/molmoact2/docs/HYBRID_ERASER.md)。MolmoAct2の画像・言語部分を使い、`hybrid_run --execute`で実行します。文字消去の成功・失敗をプログラムの実行完了と区別します。
+3. 上級案の主経路は[対象選択＋幾何計画＋MoveL](submmit_advanced_infer_v1/molmoact2/docs/HYBRID_ERASER.md)です。MolmoAct2の画像・言語部分を使い、既定は計画のみ、`hybrid_run --execute`で動作指令を送信します。文字消去の成功・失敗をプログラムの実行完了と区別します。
+4. MolmoAct2の関節action診断は[専用手順](submmit_advanced_infer_v1/molmoact2/docs/MOLMOACT2.md)を使用します。公開DROID重みはFranka用であり、AIWorkerの動作方策ではありません。診断時は予測値を保存し、アクチュエータへ配信しません。
+5. 従来のGR00T案は [GPU分離推論RUNBOOK](submmit_advanced_infer_v1/docs/RUNBOOK.md) を使用します。AIWorkerの実topic・型・関節順・制限値・vendor環境と、AIWorker用に学習したcheckpointが必要です。
 
-上級推論の構成:
+主経路の構成:
+
+```text
+AIWorker RGB-D / TF --> 会社PC --> GPU PC / MolmoAct2 対象領域選択
+                         |                        |
+                         +<----- 領域ID -----------+
+                         +--> 3D幾何経路 --> MoveL（--execute指定時）
+```
+
+従来のGR00T推論経路の構成:
 
 ```text
 AIWorker -- Zenoh / ROS 2 --> 会社PC -- SSH / ZMQ --> GPU PC / GR00T N1.7

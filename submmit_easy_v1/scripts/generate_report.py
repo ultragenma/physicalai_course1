@@ -9,7 +9,10 @@ from pathlib import Path
 
 
 def read_json(path: Path):
-    return json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return value
 
 
 def metric_number(value, label):
@@ -20,6 +23,31 @@ def metric_number(value, label):
 
 def markdown_cell(value):
     return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ").strip()
+
+
+def read_results(path: Path, index_key: str, max_steps: int):
+    records = []
+    expected_fields = {index_key, "success", "steps", "elapsed_s", "final_distance_m"}
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{path}:{line_number} is not a complete JSON record") from exc
+        if not isinstance(record, dict) or set(record) != expected_fields:
+            raise ValueError(f"{path}:{line_number} has missing or unexpected result fields")
+        if type(record[index_key]) is not int or record[index_key] != line_number:
+            raise ValueError(f"{path}:{line_number} must have consecutive {index_key} IDs starting at 1")
+        if type(record["success"]) is not bool:
+            raise ValueError(f"{path}:{line_number}.success must be boolean")
+        if type(record["steps"]) is not int or not 0 <= record["steps"] <= max_steps:
+            raise ValueError(f"{path}:{line_number}.steps is outside the run's step limit")
+        for key in ("elapsed_s", "final_distance_m"):
+            if metric_number(record[key], f"{path}:{line_number}.{key}") < 0:
+                raise ValueError(f"{path}:{line_number}.{key} must be non-negative")
+        records.append(record)
+    if not records:
+        raise ValueError(f"{path} contains no completed result records")
+    return records
 
 
 def main():
@@ -33,6 +61,9 @@ def main():
     evaluation = read_json(args.eval_run / "run_metadata.json")
     training_summary = read_json(args.train_run / "training_summary.json")
     summary = read_json(args.eval_run / "evaluation_summary.json")
+    if any(type(record.get("schema_version")) is not int or record["schema_version"] != 1
+           for record in (train, evaluation, training_summary, summary)):
+        raise ValueError("run metadata and summaries must use schema_version 1")
     if train["mode"] != "train" or evaluation["mode"] != "evaluate":
         raise ValueError("--train-run must be train and --eval-run must be evaluate")
 
@@ -115,6 +146,23 @@ def main():
     mean_elapsed_s = metric_number(summary["mean_elapsed_s"], "mean_elapsed_s")
     if mean_elapsed_s < 0:
         raise ValueError("mean_elapsed_s must be non-negative")
+
+    training_results = read_results(args.train_run / "training_episodes.jsonl", "episode", train["max_steps_per_episode"])
+    evaluation_results = read_results(args.eval_run / "evaluation_trials.jsonl", "trial", evaluation["max_steps_per_episode"])
+    for metadata, records, requested_key, completed, successes, label in (
+        (train, training_results, "training_episodes_requested", episodes_completed, training_successes, "training"),
+        (evaluation, evaluation_results, "evaluation_trials_requested", evaluation_trials, evaluation_successes, "evaluation"),
+    ):
+        requested = metadata.get(requested_key)
+        if type(requested) is not int or requested <= 0:
+            raise ValueError(f"{label} metadata must record a positive requested result count")
+        if len(records) != completed or len(records) != requested:
+            raise ValueError(f"{label} JSONL count does not match its summary and requested count")
+        if sum(record["success"] for record in records) != successes:
+            raise ValueError(f"{label} JSONL success count does not match its summary")
+    measured_mean = sum(record["elapsed_s"] for record in evaluation_results) / len(evaluation_results)
+    if not math.isclose(mean_elapsed_s, measured_mean, rel_tol=1e-9, abs_tol=1e-9):
+        raise ValueError("evaluation mean_elapsed_s does not match the trial JSONL records")
 
     report = f"""# 実行記録から生成したレポート追記
 

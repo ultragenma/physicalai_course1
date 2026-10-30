@@ -29,6 +29,15 @@ def load_config(path: str) -> dict[str, Any]:
     return cfg
 
 
+def is_canonical_nonnegative_time(value) -> bool:
+    return (
+        type(value.sec) is int
+        and type(value.nanosec) is int
+        and value.sec >= 0
+        and 0 <= value.nanosec < 1_000_000_000
+    )
+
+
 class ActionGateway(Node):
     def __init__(self, cfg: dict[str, Any]) -> None:
         super().__init__("aiworker_action_gateway")
@@ -117,7 +126,10 @@ class ActionGateway(Node):
 
     def on_joint_state(self, msg: JointState) -> None:
         now_ns = self.get_clock().now().nanoseconds
-        state_stamp_ns = msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
+        state_stamp_ns = (
+            msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
+            if is_canonical_nonnegative_time(msg.header.stamp) else 0
+        )
         state_age_ns = now_ns - state_stamp_ns
         if (
             len(msg.name) != len(msg.position)
@@ -154,6 +166,8 @@ class ActionGateway(Node):
             or state_age_ns < -50_000_000
         ):
             return self.reject("joint state header or receipt time is stale or from a different clock")
+        if not is_canonical_nonnegative_time(msg.header.stamp):
+            return self.reject("policy action timestamp has non-canonical sec/nanosec fields")
         action_stamp_ns = msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
         action_age_ns = now_ns - action_stamp_ns
         if action_stamp_ns <= 0 or action_age_ns > self.policy_action_timeout_ns or action_age_ns < -50_000_000:
@@ -175,6 +189,8 @@ class ActionGateway(Node):
                 return self.reject(f"{name} outside configured limits")
             if abs(target - self.current[name]) > self.max_step:
                 return self.reject(f"{name} delta exceeds max_step_rad")
+        if not is_canonical_nonnegative_time(point.time_from_start):
+            return self.reject("trajectory duration has non-canonical sec/nanosec fields")
         duration = point.time_from_start.sec + point.time_from_start.nanosec * 1e-9
         if duration < self.min_trajectory_seconds or duration > self.max_trajectory_seconds:
             return self.reject("trajectory duration is outside the configured range")

@@ -50,7 +50,25 @@ mkdir -p "artifacts/${RUN_ID}/masks"
   --output-json "artifacts/${RUN_ID}/metrics_t001.json"
 ```
 
-この単発評価例には、すでに作成済みの同解像度マスクが必要です。`target_roi_mask` は対象文字だけを囲み、`before_ink` を含む必要があります。v1はカメラ画像から筆跡を検出せず、白板外の原画像変化も測定しません。trial記録とレポート生成は[実験記録手順](docs/EXPERIMENT_RECORDING.md)を正本として使ってください。
+この単発評価例には、すでに作成済みの同解像度・同一画角の全画面筆跡マスクが必要です。`before_ink`/`after_ink`は白板外や対象文字以外の筆跡も同じ基準で保持し、`target_roi_mask`は消去対象だけを囲みます。消去率はROIと白板の共通領域にある筆跡だけから計算し、白板外指標は全画面マスクの前後差分から計算します。v1はカメラ画像から筆跡を検出せず、白板外の原画像変化も測定しません。trial記録とレポート生成は[実験記録手順](docs/EXPERIMENT_RECORDING.md)を正本として使ってください。
+
+## 観測metadataノード
+
+以下は白板消去の動作を含まない観測専用ノードです。AIWorkerのtopicが見えるvendor ROS 2環境で、カメラtopicの実値を確認して使用します。
+
+```bash
+cd submmit_advanced_sim_v1
+colcon build --packages-select whiteboard_task
+source install/setup.bash
+ros2 topic info --verbose <VERIFIED_RGB_TOPIC>
+ros2 run whiteboard_task whiteboard_bridge --ros-args \
+  -p rgb_image_topic:=<VERIFIED_RGB_TOPIC> \
+  -p run_id:=<RUN_ID>
+```
+
+subscriptionはsensor-data QoS（BEST_EFFORT）を使います。起動後にmetadataが増えない場合は、topic型・QoS・vendor Zenoh環境を確認します。標準では1秒間隔・最大300件で、画像画素や動作指令は保存・発行しません。
+
+metadataはGit管理外の`artifacts/<RUN_ID>/observations/`へ保存します。既存の出力先では起動を拒否し、個々のファイルも排他的に作成します。再起動は新しいrun ID、または同run配下の未使用sessionを`-p output_directory:=artifacts/<RUN_ID>/observations_002`のように指定します。`artifacts/<RUN_ID>/`外への出力は拒否します。
 
 実行後の記録とレポート転記の正確な手順は[実験記録手順](docs/EXPERIMENT_RECORDING.md)を参照してください。詳細は[実装計画](docs/IMPLEMENTATION_PLAN.md)、[運用チェックリスト](docs/EXPERIMENT_CHECKLIST.md)、[提出チェック](docs/SUBMISSION_CHECKLIST.md)にあります。
 

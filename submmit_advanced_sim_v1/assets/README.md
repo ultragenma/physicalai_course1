@@ -6,7 +6,7 @@
 
 - `before_rgb.png`, `after_rgb.png`: 白板を観測する固定カメラ画像
 - `board_mask.png`: 白板のみ255の二値画像
-- `before_ink_mask.png`, `after_ink_mask.png`: 筆跡のみ255の二値画像
+- `before_ink_mask.png`, `after_ink_mask.png`: 同一画角の全画面筆跡マスク。白板外や対象文字以外の筆跡も前後で同じ基準で保持する二値画像
 - `target_roi_mask.png`: 消去対象の文字だけを囲う二値画像
 - `run_metadata.json`: シミュレータ名・公式モデル版・コミット・白板寸法・カメラ校正・実行日時（個人情報を除く）
 

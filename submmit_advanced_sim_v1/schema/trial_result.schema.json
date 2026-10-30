@@ -24,7 +24,48 @@
         "outside_ink_mask_change_ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
       }
     },
-    "evidence": {"type": "object", "additionalProperties": false, "required": ["before_mask_sha256", "after_mask_sha256", "board_mask_sha256", "target_roi_mask_sha256", "video_id_or_redacted_path"], "properties": {"before_mask_sha256": {"type": ["string", "null"]}, "after_mask_sha256": {"type": ["string", "null"]}, "board_mask_sha256": {"type": ["string", "null"]}, "target_roi_mask_sha256": {"type": ["string", "null"]}, "video_id_or_redacted_path": {"type": ["string", "null"]}}},
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["before_mask_sha256", "after_mask_sha256", "board_mask_sha256", "target_roi_mask_sha256", "video_id_or_redacted_path"],
+      "properties": {
+        "before_mask_sha256": {"$ref": "#/$defs/optional_sha256"},
+        "after_mask_sha256": {"$ref": "#/$defs/optional_sha256"},
+        "board_mask_sha256": {"$ref": "#/$defs/optional_sha256"},
+        "target_roi_mask_sha256": {"$ref": "#/$defs/optional_sha256"},
+        "video_id_or_redacted_path": {"type": ["string", "null"]}
+      }
+    },
     "operator_notes": {"type": "string"}
-  }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "optional_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"metrics": {"properties": {"available": {"const": true}}}}},
+      "then": {
+        "properties": {
+          "metrics": {"properties": {
+            "before_target_ink_pixels": {"type": "integer", "minimum": 1},
+            "residual_target_ink_pixels": {"type": "integer", "minimum": 0},
+            "target_roi_erasure_ratio": {"type": "number", "maximum": 1},
+            "outside_ink_mask_change_ratio": {"type": "number", "minimum": 0, "maximum": 1}
+          }},
+          "evidence": {"properties": {
+            "before_mask_sha256": {"$ref": "#/$defs/sha256"},
+            "after_mask_sha256": {"$ref": "#/$defs/sha256"},
+            "board_mask_sha256": {"$ref": "#/$defs/sha256"},
+            "target_roi_mask_sha256": {"$ref": "#/$defs/sha256"}
+          }}
+        }
+      },
+      "else": {"properties": {"metrics": {"properties": {
+        "before_target_ink_pixels": {"type": "null"},
+        "residual_target_ink_pixels": {"type": "null"},
+        "target_roi_erasure_ratio": {"type": "null"},
+        "outside_ink_mask_change_ratio": {"type": "null"}
+      }}}}
+    }
+  ]
 }

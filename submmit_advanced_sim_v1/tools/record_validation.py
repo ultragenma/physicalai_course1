@@ -151,6 +151,8 @@ def validate_trial(trial: object, expected_run_id: str) -> dict:
     if not isinstance(evidence, dict) or set(evidence) != required_evidence:
         raise ValueError(f"trial {trial_id}.evidence has missing or unexpected fields")
     for key, value in evidence.items():
+        if key.endswith("sha256") and trial["metrics"]["available"] and value is None:
+            raise ValueError(f"trial {trial_id}.evidence.{key} is required when metrics are available")
         if key.endswith("sha256") and value is not None and (not isinstance(value, str) or not SHA256.fullmatch(value)):
             raise ValueError(f"trial {trial_id}.evidence.{key} must be a lowercase SHA-256 or null")
         if key == "video_id_or_redacted_path" and value is not None and not isinstance(value, str):

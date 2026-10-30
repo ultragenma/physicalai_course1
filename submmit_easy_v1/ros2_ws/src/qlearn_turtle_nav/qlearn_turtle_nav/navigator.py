@@ -61,6 +61,7 @@ class QLearnTurtleNavigator(Node):
         if self.evaluation_trials < 1:
             raise ValueError("evaluation_trials must be positive")
         self.pose = None
+        self.exit_code = 0
         self.previous_distance = None
         self.step_count = 0
         self.episode = 0
@@ -79,7 +80,7 @@ class QLearnTurtleNavigator(Node):
         self.mode = self.mode.lower()
         if self.mode not in {"train", "evaluate"}:
             raise ValueError("mode must be 'train' or 'evaluate'")
-        if self.episodes <= 0 or self.control_period_s <= 0 or self.max_steps_per_episode <= 0:
+        if self.episodes <= 0 or not math.isfinite(self.control_period_s) or self.control_period_s <= 0 or self.max_steps_per_episode <= 0:
             raise ValueError("episodes, control_period_s, and max_steps_per_episode must be positive")
         if not all(0.5 <= coordinate <= 10.5 for coordinate in self.target):
             raise ValueError("target_x and target_y must stay inside the safe turtlesim range [0.5, 10.5]")
@@ -182,6 +183,8 @@ class QLearnTurtleNavigator(Node):
             self.awaiting_reset_pose = True
             self.reset_pose_deadline = time.monotonic() + 5.0
         except Exception as error:  # ROS client failures must be visible to the operator.
+            self.exit_code = 1
+            self._stop()
             self.get_logger().fatal(f"Episode reset failed; stopping the node: {error}")
             rclpy.shutdown()
         finally:
@@ -203,6 +206,7 @@ class QLearnTurtleNavigator(Node):
             return
         if self.awaiting_reset_pose:
             if self.reset_pose_deadline is not None and time.monotonic() > self.reset_pose_deadline:
+                self.exit_code = 1
                 self._stop()
                 self.get_logger().fatal("Timed out waiting for the reset pose on /turtle1/pose; stopping.")
                 rclpy.shutdown()
@@ -338,14 +342,19 @@ class QLearnTurtleNavigator(Node):
         (self.run_directory / "evaluation_summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
 
-def main() -> None:
+def main() -> int:
     rclpy.init()
     node = None
     try:
         node = QLearnTurtleNavigator()
         rclpy.spin(node)
+        return node.exit_code
     finally:
         if node is not None:
             node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

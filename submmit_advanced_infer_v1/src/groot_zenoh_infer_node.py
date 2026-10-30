@@ -168,6 +168,8 @@ def validate_candidate_config(cfg: dict[str, Any]) -> None:
 
 
 def stamp_to_ns(stamp) -> int:
+    if type(stamp.sec) is not int or type(stamp.nanosec) is not int or stamp.sec < 0 or not 0 <= stamp.nanosec < 1_000_000_000:
+        return 0
     return int(stamp.sec) * 1_000_000_000 + int(stamp.nanosec)
 
 

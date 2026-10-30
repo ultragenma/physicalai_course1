@@ -1,4 +1,8 @@
-# AIWorker Whiteboard Erasing — GR00T N1.7 inference preparation
+# AIWorker Whiteboard Erasing — MolmoAct2 / GR00T
+
+上級案の主経路は[MolmoAct2の対象選択＋幾何計画＋MoveL](molmoact2/docs/HYBRID_ERASER.md)です。
+以下は引き続き利用できるGR00T N1.7経路の準備資料です。両経路は独立しており、
+MolmoAct2のMoveL指令をGR00T gatewayへ接続する統合は行っていません。
 
 2026-10-28: [MolmoAct2用の独立パッケージ](molmoact2/README.md)を追加しました。
 GPUサーバ、同期ROS/HTTPクライアント、公開DROID方策の診断とAIWorker native形式の検査を含みます。
@@ -10,7 +14,7 @@ AIWorker has already been controlled by GR00T.  The target task is: use an
 eraser held by the robot to erase specified writing on a vertical whiteboard,
 then present a camera view in which the target writing is absent.
 
-The primary deployment route is ROBOTIS **Cyclo Intelligence** running on the
+For the GR00T route, the vendor deployment workflow uses ROBOTIS **Cyclo Intelligence** running on the
 separate GPU workstation. Connect it to the AIWorker network over Zenoh, choose
 the GR00T N1.7 inference backend, run **3D Sim Deploy** first (which blocks
 physical-robot commands), and progress to **Real Robot Deploy** only after the

@@ -55,4 +55,6 @@ python3 scripts/generate_report.py \
 
 生成する `REPORT_MEASUREMENTS.md` は、ROSディストリビューション・rclpy/Python版・seed・目標/開始姿勢・学習エピソード・評価試行数・成功数/率・平均時間・Q表SHA-256をログから転記する。GitHub URL、YouTube URL、定性的な考察だけは `REPORT_DRAFT.md` に手動で追記する。
 
+生成時には学習・評価のJSONL本文を読み、連番、型、要求回数、成功数、平均時間をmetadata/summaryと照合する。ログの欠落・途中切断・件数不一致ではレポートを生成しない。reset失敗またはreset後Pose待機タイムアウト時はnavigatorが終了コード1を返すため、評価shellも失敗終了する。既存runを上書きせず、原因を直して新しいrun IDで再実行する。
+
 この生成器は学習記録と評価記録のseed、目標・開始姿勢、ROS/Python環境、制御周期、最大ステップ、Q表SHA-256が一致しない場合、混在した成功率を出さずエラーで停止する。パスやPC固有の絶対パスはレポートに出力しない。

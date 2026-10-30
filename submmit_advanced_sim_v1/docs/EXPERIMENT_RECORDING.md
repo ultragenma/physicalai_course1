@@ -8,7 +8,7 @@
 
 | ファイル | 役割 | 公開前の扱い |
 | --- | --- | --- |
-| `metadata.json` | simulator/asset/software/model/GPUと課題の固定情報 | 全項目を目視で匿名化後に要約のみ転記 |
+| `metadata.json` | simulator/asset/software/model/GPUと課題の固定情報 | 既定は公開用要約のみ。詳細値の出力には全出力項目を目視で匿名化し追加flagを指定 |
 | `metrics_<trial_id>.json` | `erase_assessment.py` が出す画素指標 | マスク生成法とともに確認 |
 | `trials/<trial_id>.json` | status・時刻・所要時間・metrics・注記 | 失敗も保存し、公開は要約のみ |
 | `report_facts.md` | プライバシー確認後の集計済み転記候補 | operator notes・動画参照・画像/マスク参照を含めずに生成 |
@@ -33,7 +33,7 @@ cp records/templates/experiment_metadata.template.json "artifacts/${RUN_ID}/meta
 
 ## 1. 各試行: マスクからmetrics JSONを作る
 
-4枚の同一解像度二値マスクを用意する。`before_ink_mask`は対象ROI・白板内だけに含め、`target_roi_mask`は対象文字を含む。マスク作成モデル/アルゴリズム、閾値、版をmetadataの`task.mask_generation_method`へ記す。
+4枚の同一解像度・同一画角の2次元二値マスクを用意する。`before_ink_mask`/`after_ink_mask`は白板外・対象文字以外の筆跡も含む全画面マスクとし、片側だけROIで切り取らない。`target_roi_mask`は対象文字を囲み、ROIと白板の共通領域に消去前の筆跡が1画素以上必要である。マスク作成モデル/アルゴリズム、閾値、版をmetadataの`task.mask_generation_method`へ記す。
 
 ```bash
 TRIAL_ID=t001
@@ -55,6 +55,8 @@ ROI_HASH=$(sha256sum "artifacts/${RUN_ID}/masks/${TRIAL_ID}_target_roi.png" | aw
 ## 2. 各試行: trial JSONを作る
 
 時刻はUTCの`Z`表記で残します。`status=completed`は完走を示すだけで、成功を意味しません。評価不能な試行は`--metrics`を省略し、`failed`、`aborted`または`invalid`を正確に選びます。
+
+metricsを記録する場合は4枚すべてのmask SHA-256が必須です。これは原記録を識別するための値であり、生成器がmask画像を再計算・照合したことを意味しません。
 
 ```bash
 python3 tools/record_trial.py \
@@ -86,6 +88,10 @@ python3 tools/generate_report_facts.py \
 ```
 
 生成器はprivacy reviewの3フラグがすべて`false`でないと停止し、全trialの形式・run ID・時刻・計測範囲を検証します。出力も`artifacts/<run_id>/`内に限定します。生成された`report_facts.md`と`trial_summary.csv`から、`docs/REPORT_DRAFT.md`の「実験結果・提出情報」に環境、試行数、計測済み試行数、平均指標を転記する。成功数・成功率は、事前に定義した成功条件と人の確認に基づいて手動で記す。GitHub URL、YouTube URL、動画倍率、考察、匿名化した失敗注記も手動で記す。
+
+平均指標はmetricsがある試行のうち`invalid`を除外して計算し、除外した計測済み件数も表示する。`failed`/`aborted`でも有効な計測値は含め、成功例だけを選ばない。試行表とCSVにはinvalidも残し、CSVの`included_in_metric_averages`で集計対象を示す。
+
+既定の環境出力は`privacy_review.public_safe_summary`、run ID、実行種別だけです。asset/checkpoint等の詳細識別子を転記する場合は、全出力項目を公開可能な値へ匿名化・目視確認したうえで同じ生成コマンドへ`--include-reviewed-environment`を追加します。privacy flagがfalseでも、この追加指定なしでは生の環境識別子を出力しません。
 
 ## レポートのフィールド対応
 

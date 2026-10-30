@@ -34,13 +34,13 @@ def measure(before_ink, after_ink, board_mask, target_roi_mask) -> ErasureMetric
     after = np.asarray(after_ink, dtype=bool)
     board = np.asarray(board_mask, dtype=bool)
     target_roi = np.asarray(target_roi_mask, dtype=bool)
+    if before.ndim != 2 or before.size == 0:
+        raise ValueError("masks must be non-empty 2-D arrays")
     if before.shape != after.shape or before.shape != board.shape or before.shape != target_roi.shape:
         raise ValueError("all masks must have identical shape")
     target = target_roi & board
     if not np.any(board) or not np.any(target):
         raise ValueError("board and target ROI masks must be non-empty")
-    if np.any(before & ~target):
-        raise ValueError("before_ink must be contained in the target ROI and board masks")
     ink_before = int(np.count_nonzero(before & target))
     if ink_before == 0:
         raise ValueError("before_ink must contain at least one target pixel")
